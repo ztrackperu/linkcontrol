@@ -20,12 +20,10 @@
                         <div class="col-md-4 text-end">
                             <div class="d-flex justify-content-end gap-2 flex-wrap">
                                 <span class="badge bg-success bg-opacity-25 text-white px-3 py-2 fs-6">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    Sistema Activo
+                                    <i class="bi bi-check-circle me-1"></i>Sistema Activo
                                 </span>
                                 <span class="badge bg-info bg-opacity-25 text-white px-3 py-2 fs-6">
-                                    <i class="bi bi-clock me-1"></i>
-                                    <span id="currentTime">--:--</span>
+                                    <i class="bi bi-clock me-1"></i><span id="currentTime">--:--</span>
                                 </span>
                             </div>
                         </div>
@@ -68,65 +66,31 @@
             <!-- FORMULARIO CREAR CONTROL -->
             <div class="col-12 col-lg-6">
                 <div class="card shadow border-0">
-                    <!-- resto del código... -->
-
-                    <!-- resto del código... -->
-
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Crear Control Automático</h5>
+                        <button type="button" class="btn btn-light btn-sm" id="btnAgregarUnico" style="display: none;" onclick="agregarFormularioUnico()">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar
+                        </button>
                     </div>
                     <div class="card-body">
                         <form id="frmControlAutomatico">
                             <!-- SELECT OPCIÓN -->
                             <div class="mb-3">
                                 <label for="tipoControl" class="form-label">Opción</label>
-                                <select class="form-select" id="tipoControl" name="tipoControl" required>
+                                <select class="form-select" id="tipoControl" name="tipoControl" required onchange="mostrarFormulario()">
                                     <option value="">Seleccionar...</option>
                                     <option value="unico">Único</option>
                                     <option value="ciclico">Cíclico</option>
                                 </select>
                             </div>
 
-                            <!-- FORMULARIO DINÁMICO -->
-                            <div id="formularioDinamico" style="display: none;">
-                                <!-- ETAPA -->
-                                <div class="mb-3">
-                                    <label for="etapa" class="form-label">Etapa</label>
-                                    <input type="text" class="form-control" id="etapa" name="etapa" placeholder="Nombre de la etapa" required>
-                                </div>
+                            <!-- CONTENEDOR FORMULARIOS -->
+                            <div id="contenedorFormularios"></div>
 
-                                <!-- FECHA Y HORA (Solo para Único) -->
-                                <div class="mb-3" id="campoFechaHora" style="display: none;">
-                                    <label for="fechaHora" class="form-label">Fecha y Hora</label>
-                                    <input type="datetime-local" class="form-control" id="fechaHora" name="fechaHora">
-                                </div>
-
-                                <!-- HORA (Solo para Cíclico) -->
-                                <div class="mb-3" id="campoHora" style="display: none;">
-                                    <label for="hora" class="form-label">Hora</label>
-                                    <input type="time" class="form-control" id="hora" name="hora">
-                                </div>
-
-                                <!-- HORAS -->
-                                <div class="mb-3">
-                                    <label for="horas" class="form-label">Horas</label>
-                                    <input type="number" class="form-control" id="horas" name="horas" min="1" max="24" placeholder="Duración en horas" required>
-                                </div>
-
-                                <!-- TEMPERATURA -->
-                                <div class="mb-3">
-                                    <label for="temperatura" class="form-label">Temperatura (°C)</label>
-                                    <input type="number" class="form-control" id="temperatura" name="temperatura" step="0.1" placeholder="Temperatura objetivo" required>
-                                </div>
-
-                                <!-- HUMEDAD (OCULTO) -->
-                                <input type="hidden" id="humedad" name="humedad" value="50">
-
-                                <!-- BOTONES -->
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
-                                    <button type="submit" class="btn btn-success">Crear Control</button>
-                                </div>
+                            <!-- BOTONES -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end" id="botonesFormulario" style="display: none;">
+                                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                                <button type="submit" class="btn btn-success">Crear Control</button>
                             </div>
                         </form>
                     </div>
@@ -152,9 +116,7 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="contenidoTabla">
-                                    <!-- Contenido dinámico -->
-                                </tbody>
+                                <tbody id="contenidoTabla"></tbody>
                             </table>
                         </div>
                     </div>
@@ -165,43 +127,119 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tipoControl = document.getElementById('tipoControl');
-    const formularioDinamico = document.getElementById('formularioDinamico');
-    const campoFechaHora = document.getElementById('campoFechaHora');
-    const campoHora = document.getElementById('campoHora');
-    const fechaHoraInput = document.getElementById('fechaHora');
-    const horaInput = document.getElementById('hora');
+let contadorFormularios = 0;
 
-    // Mostrar/ocultar formulario según selección
-    tipoControl.addEventListener('change', function() {
-        const valor = this.value;
+function mostrarFormulario() {
+    const tipoControl = document.getElementById('tipoControl').value;
+    const btnAgregarUnico = document.getElementById('btnAgregarUnico');
+    const botonesFormulario = document.getElementById('botonesFormulario');
+    const contenedor = document.getElementById('contenedorFormularios');
+    
+    if (tipoControl) {
+        botonesFormulario.style.display = 'block';
         
-        if (valor) {
-            formularioDinamico.style.display = 'block';
-            
-            if (valor === 'unico') {
-                campoFechaHora.style.display = 'block';
-                campoHora.style.display = 'none';
-                fechaHoraInput.required = true;
-                horaInput.required = false;
-            } else if (valor === 'ciclico') {
-                campoFechaHora.style.display = 'none';
-                campoHora.style.display = 'block';
-                fechaHoraInput.required = false;
-                horaInput.required = true;
+        if (tipoControl === 'unico') {
+            btnAgregarUnico.style.display = 'block';
+            if (contadorFormularios === 0) {
+                agregarFormularioUnico();
             }
         } else {
-            formularioDinamico.style.display = 'none';
+            btnAgregarUnico.style.display = 'none';
+            contenedor.innerHTML = crearFormularioCiclico();
         }
-    });
-});
+    } else {
+        btnAgregarUnico.style.display = 'none';
+        botonesFormulario.style.display = 'none';
+        contenedor.innerHTML = '';
+        contadorFormularios = 0;
+    }
+}
+
+function crearFormularioUnico(numero) {
+    return `
+        <div class="border rounded p-3 mb-3 bg-light" id="formulario-${numero}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-primary">
+                    <i class="bi bi-gear-fill me-2"></i>Control Único #${numero}
+                </h6>
+                ${numero > 1 ? `<button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(${numero})">
+                    <i class="bi bi-trash"></i>
+                </button>` : ''}
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Etapa</label>
+                <input type="text" class="form-control" name="etapa[]" placeholder="Nombre de la etapa" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha y Hora</label>
+                <input type="datetime-local" class="form-control" name="fechaHora[]" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Horas</label>
+                <input type="number" class="form-control" name="horas[]" min="1" max="24" placeholder="Duración en horas" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Temperatura (°C)</label>
+                <input type="number" class="form-control" name="temperatura[]" step="0.1" placeholder="Temperatura objetivo" required>
+            </div>
+
+            <input type="hidden" name="humedad[]" value="50">
+        </div>
+    `;
+}
+
+function crearFormularioCiclico() {
+    return `
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h6 class="mb-3 text-primary">
+                <i class="bi bi-arrow-repeat me-2"></i>Control Cíclico
+            </h6>
+            
+            <div class="mb-3">
+                <label class="form-label">Etapa</label>
+                <input type="text" class="form-control" name="etapa" placeholder="Nombre de la etapa" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Hora</label>
+                <input type="time" class="form-control" name="hora" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Horas</label>
+                <input type="number" class="form-control" name="horas" min="1" max="24" placeholder="Duración en horas" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Temperatura (°C)</label>
+                <input type="number" class="form-control" name="temperatura" step="0.1" placeholder="Temperatura objetivo" required>
+            </div>
+
+            <input type="hidden" name="humedad" value="50">
+        </div>
+    `;
+}
+
+function agregarFormularioUnico() {
+    contadorFormularios++;
+    const contenedor = document.getElementById('contenedorFormularios');
+    contenedor.insertAdjacentHTML('beforeend', crearFormularioUnico(contadorFormularios));
+}
+
+function eliminarFormulario(numero) {
+    document.getElementById(`formulario-${numero}`).remove();
+}
 
 function limpiarFormulario() {
     document.getElementById('frmControlAutomatico').reset();
-    document.getElementById('formularioDinamico').style.display = 'none';
-    document.getElementById('campoFechaHora').style.display = 'none';
-    document.getElementById('campoHora').style.display = 'none';
+    document.getElementById('contenedorFormularios').innerHTML = '';
+    document.getElementById('btnAgregarUnico').style.display = 'none';
+    document.getElementById('botonesFormulario').style.display = 'none';
+    contadorFormularios = 0;
 }
 </script>
 
