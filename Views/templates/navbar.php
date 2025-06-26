@@ -80,6 +80,13 @@
                     <span class="text-uppercase">Data</span>
                 </a>
             </li>
+            <li class="sidebar-item">
+                <a href="<?php echo base_url?>Automatico" class="sidebar-link">
+                <i class="bi bi-robot"></i>
+                    <span class="text-uppercase text-wrap">Crear Control Automático</span>
+                </a>
+            </li>
+            
         </ul>
     </aside>
          
