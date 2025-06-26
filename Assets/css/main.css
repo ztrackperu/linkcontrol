@@ -2,7 +2,7 @@
   content: ">";
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
 
 ::after,
 ::before {
@@ -19,33 +19,31 @@ li {
   list-style: none;
 }
 
-h1,h5 {
+h1,
+h5 {
   font-weight: 600;
   font-size: 1rem;
 }
-
-
 
 /*DEFINIENDO COLORES Y ESTILOS PRINCIPALES PARA LA PÁGINA*/
 :root {
   --bg-color: #f8f9fa;
   --bg-light: #f8f9fa;
 
-  --font-color:#1f2933;   
+  --font-color: #1f2933;
   --font-light: #000000;
   --font-family: "Lucida Console", "Courier New", monospace;
 }
 /* #353e44; background-color - mode dark theme */
-body.dark-theme{
+body.dark-theme {
   background-color: #353e44;
-  
 }
 
-.card.dark-theme{
+.card.dark-theme {
   background-color: #587782;
 }
 
-.card{
+.card {
   background-color: white;
 }
 .wrapper {
@@ -63,7 +61,7 @@ body.dark-theme{
   width: 70px;
   min-width: 70px;
   z-index: 1000;
-  transition: all .25s ease-in-out;
+  transition: all 0.25s ease-in-out;
   background-color: #0e2238;
   display: flex;
   flex-direction: column;
@@ -83,7 +81,7 @@ body.dark-theme{
 
 .logo-btn i {
   font-size: 1.5rem;
-  color: #FFF;
+  color: #fff;
 }
 
 .toggle-btn {
@@ -98,21 +96,21 @@ body.dark-theme{
   color: #000;
 }
 
-.toggle-btnLight i{
+.toggle-btnLight i {
   font-size: 1.5rem;
   color: #000;
 }
 
-.toggle-btnDark i{
+.toggle-btnDark i {
   font-size: 1.5rem;
-  color: #FFF;
+  color: #fff;
 }
 
-.profileLight{
+.profileLight {
   background-color: white;
 }
 
-.profileDark{
+.profileDark {
   background-color: #0e2238;
 }
 .sidebar-logo {
@@ -120,7 +118,7 @@ body.dark-theme{
 }
 
 .sidebar-logo a {
-  color: #FFF;
+  color: #fff;
   font-size: 1.15rem;
   font-weight: 600;
 }
@@ -136,8 +134,8 @@ body.dark-theme{
 }
 
 a.sidebar-link {
-  padding: .625rem 1.625rem;
-  color: #FFF;
+  padding: 0.625rem 1.625rem;
+  color: #fff;
   display: block;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -146,16 +144,16 @@ a.sidebar-link {
 
 .sidebar-link i {
   font-size: 1.1rem;
-  margin-right: .75rem;
+  margin-right: 0.75rem;
 }
 
 a.sidebar-link:hover {
-  background-color: rgba(255, 255, 255, .075);
+  background-color: rgba(255, 255, 255, 0.075);
   border-left: 3px solid #3b7ddd;
 }
 
-.sidebar-title{
-  color:white;
+.sidebar-title {
+  color: white;
   position: relative;
 }
 
@@ -173,7 +171,7 @@ a.sidebar-link:hover {
   display: none;
 }
 
-#sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
+#sidebar:not(.expand) .sidebar-item:hover .has-dropdown + .sidebar-dropdown {
   display: block;
   max-height: 25em;
   width: 100%;
@@ -182,7 +180,7 @@ a.sidebar-link:hover {
 
 #sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
   border: solid;
-  border-width: 0 .075rem .075rem 0;
+  border-width: 0 0.075rem 0.075rem 0;
   content: "";
   display: inline-block;
   padding: 2px;
@@ -190,37 +188,35 @@ a.sidebar-link:hover {
   right: 1.5rem;
   top: 1.4rem;
   transform: rotate(-135deg);
-  transition: all .2s ease-out;
+  transition: all 0.2s ease-out;
 }
 
 #sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
   transform: rotate(45deg);
-  transition: all .2s ease-out;
+  transition: all 0.2s ease-out;
 }
 
-.icono i{
+.icono i {
   width: 100px;
   height: 100px;
 }
 
-i{
+i {
   font-size: 1.5rem;
 }
 
 .datepicker {
   font-size: 13px;
   background-color: #ecf1f6;
-  
 }
 
-.search{
+.search {
   background-color: #ecf1f6;
 }
 
-#close-mobile{
-  display:none;
+#close-mobile {
+  display: none;
 }
-
 
 .timeline {
   position: relative;
@@ -230,7 +226,7 @@ i{
 }
 
 .timeline::before {
-  content: '';
+  content: "";
   position: absolute;
   height: 3px;
   background-color: #6c757d;
@@ -250,23 +246,22 @@ i{
   color: #fff;
   text-align: center;
   background: #007bff;
-  
 }
 
 @keyframes pulse {
   0% {
-      transform: scale(1);
+    transform: scale(1);
   }
   50% {
-      transform: scale(1.05);
+    transform: scale(1.05);
   }
   100% {
-      transform: scale(1);
+    transform: scale(1);
   }
 }
 
 #timeline-primary {
-animation: pulse 2s infinite;
+  animation: pulse 2s infinite;
 }
 
 .hide-content {
@@ -274,8 +269,8 @@ animation: pulse 2s infinite;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-#da:hover #hour{
-  display:none;
+#da:hover #hour {
+  display: none;
   overflow: visible; /* Asegura que el contenido desbordado se muestre */
 }
 
@@ -289,7 +284,6 @@ animation: pulse 2s infinite;
   width: 200px;
 }
 
-
 /* CUSTOMIZING SCROLBAR THAT USE WEBKIT*/
 /* Estilo para todas las barras de desplazamiento */
 
@@ -300,32 +294,32 @@ animation: pulse 2s infinite;
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
 
 /*DASHBOARD CSS*/
 
 /* TIMELINE MODULE PAGE */
-.title-timeline{
-  position:relative;
+.title-timeline {
+  position: relative;
   left: 48%;
 }
 
-.main-timeline-4{
-  position:relative;
+.main-timeline-4 {
+  position: relative;
 }
 
-.main-timeline-4::after{
+.main-timeline-4::after {
   content: "";
   position: absolute;
   width: 3px;
@@ -335,152 +329,143 @@ animation: pulse 2s infinite;
   left: 50%;
 }
 
-
-.timeline-4{
+.timeline-4 {
   position: relative;
   background-color: inherit;
   width: 50%;
 }
 
-.timeline-4::after{
+.timeline-4::after {
   content: "";
   position: absolute;
   width: 25px;
   height: 25px;
   right: -11px;
   top: 15px;
-  z-index:1;
+  z-index: 1;
 }
 
-.left-4{
+.left-4 {
   padding: 0px 40px 20px 0px;
   left: 0;
 }
 
-.right-4{
+.right-4 {
   padding: 0px 0px 20px 40px;
   left: 50%;
 }
 
-.left-4::before{
+.left-4::before {
   content: "";
-  position:absolute;
+  position: absolute;
 }
-
 
 /* ESTRELLA ECOMMERCE - PRODUCT DETAIL*/
-.text-warning{
-  color: #FFC107;
+.text-warning {
+  color: #ffc107;
 }
 
-
 /* NIGHT MODE*/
-.night-mode{
+.night-mode {
   background-color: #323a40;
   color: white;
 }
 
-.night-mode-card{
+.night-mode-card {
   background-color: #34404a;
   color: white;
 }
 
-@media only screen and (max-width:600px){
-  
-  
-  .nav-item{
-     display: none;
-   
+@media only screen and (max-width: 600px) {
+  .nav-item {
+    display: none;
   }
 
-  #close-mobile{
-      display: block;
+  #close-mobile {
+    display: block;
   }
 
   #sidebar.expand {
-      width: 260px;
-      min-width: 260px;
-      height:100%;
-      position: fixed;
+    width: 260px;
+    min-width: 260px;
+    height: 100%;
+    position: fixed;
   }
 
-  #buscador{
-      display: none;
+  #buscador {
+    display: none;
   }
 
-  #calendar{
-      display: none;
+  #calendar {
+    display: none;
   }
 
-  #refresh{
-      display: none;
-  
+  #refresh {
+    display: none;
   }
 
-  #filter{
-      display: none;
+  #filter {
+    display: none;
   }
 
   .hide-content {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  #da:hover #hour{
-      display:none;
-      overflow: visible; 
-  #actions {
+  #da:hover #hour {
+    display: none;
+    overflow: visible;
+    #actions {
       width: 0;
       overflow: hidden;
       transition: width 0.9s;
-  }
-  #da:hover #actions {
+    }
+    #da:hover #actions {
       width: 1200px;
-  }
-  
-  
-}
-
-@media only screen and (min-width:601px) and (max-width:1024px){
-  .nav-item{
-      display: none;
-  }
-  #buscador{
-      display: none;
+    }
   }
 
-  #calendar{
+  @media only screen and (min-width: 601px) and (max-width: 1024px) {
+    .nav-item {
       display: none;
-  }
-
-  #refresh{
+    }
+    #buscador {
       display: none;
-  
-  }
+    }
 
-  #filter{
+    #calendar {
       display: none;
-  }
+    }
 
-  .hide-content {
+    #refresh {
+      display: none;
+    }
+
+    #filter {
+      display: none;
+    }
+
+    .hide-content {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-  }
-  #da:hover #hour{
-      display:none;
-      overflow: visible; }
-  
-  #actions {
+    }
+    #da:hover #hour {
+      display: none;
+      overflow: visible;
+    }
+
+    #actions {
       width: 0;
       overflow: hidden;
       transition: width 0.9s;
-  }
-  
-  #da:hover #actions {
+    }
+
+    #da:hover #actions {
       width: 400px;
+    }
   }
-}
 }
 nav a {
   color: #000;
@@ -496,7 +481,7 @@ nav a {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #25D366;
+  background-color: #25d366;
   display: flex;
   align-items: center;
   justify-content: center;

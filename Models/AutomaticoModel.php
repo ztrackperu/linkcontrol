@@ -6,34 +6,51 @@ class AutomaticoModel extends Query
         parent::__construct();
     }
 
-    public function getControlesAutomaticos($empresa_id)
-    {
-        $sql = "SELECT * FROM controles_automaticos WHERE empresa_id = $empresa_id ORDER BY id DESC";
-        $res = $this->selectAll($sql);
-        return $res;
-    }
+    public function obtenerControles($data)
+{
+    $ch = curl_init();
+    $data = json_encode($data);
+    curl_setopt($ch, CURLOPT_URL, urlapicontrol."/Control/listar");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    
+    return $res;
+}
 
-    public function crearControlAutomatico($datos)
-    {
-        $sql = "INSERT INTO controles_automaticos (tipo_control, etapa, programacion, horas, temperatura, humedad, empresa_id, estado) VALUES (?,?,?,?,?,?,?,?)";
-        $array = array(
-            $datos['tipo_control'],
-            $datos['etapa'], 
-            $datos['programacion'],
-            $datos['horas'],
-            $datos['temperatura'],
-            $datos['humedad'],
-            $datos['empresa_id'],
-            1
-        );
-        
-        $data = $this->save($sql, $array);
-        if ($data == 1) {
-            $res = "ok";
-        } else {
-            $res = "error";
-        }
-        return $res;
-    }
+public function crearControl($data)
+{
+    $ch = curl_init();
+    $jsonData = json_encode($data);
+    curl_setopt($ch, CURLOPT_URL, urlapicontrol."/Control/");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    
+    
+    return $res;
+}
+public function verControl($data)
+{
+    $ch = curl_init();
+    $jsonData = json_encode($data);
+    curl_setopt($ch, CURLOPT_URL, urlapicontrol."/Control/ver");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    
+    
+    return $res;
+}
+
+
+
+
 }
 ?>

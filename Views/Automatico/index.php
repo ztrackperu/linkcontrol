@@ -67,41 +67,70 @@
             <div class="card shadow border-0 h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Crear Control Automático</h5>
-                    <button type="button" class="btn btn-light btn-sm d-none" id="btnAgregarUnico" onclick="agregarFormularioUnico()">
+                    <!-- CAMBIO: ID correcto y función correcta -->
+                    <button type="button" class="btn btn-light btn-sm d-none" id="btnAgregar" onclick="agregarFormulario()">
                         <i class="bi bi-plus-circle me-1"></i>Agregar
                     </button>
                 </div>
                 <div class="card-body p-0 d-flex flex-column">
-                    <!-- Área de formulario con altura fija y scroll -->
-                    <div class="flex-grow-1 overflow-auto p-3" style="height: 500px; min-height: 500px;">
-                        <form id="frmControlAutomatico">
-                            <!-- SELECT OPCIÓN -->
-                            <div class="mb-3">
-                                <label for="tipoControl" class="form-label fw-bold">Opción</label>
-                                <select class="form-select" id="tipoControl" name="tipoControl" required onchange="mostrarFormulario()">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="unico">Único</option>
-                                    <option value="ciclico">Cíclico</option>
-                                </select>
+    <!-- Área de formulario con altura fija y scroll -->
+    <div class="flex-grow-1 overflow-auto p-3" style="height: 500px; min-height: 500px;">
+        <form id="frmControlAutomatico">
+            <!-- SELECT OPCIÓN -->
+            <div class="mb-3">
+                <label for="tipoControl" class="form-label fw-bold">Opción</label>
+                <select class="form-select" id="tipoControl" name="tipoControl" required onchange="mostrarFormulario()">
+                    <option value="">Seleccionar...</option>
+                    <option value="unico">Único</option>
+                    <option value="ciclico">Cíclico</option>
+                </select>
+            </div>
+
+            <!-- CAMPO FECHA FIN DEL PROCESO (Aparece para ambos tipos) -->
+            <div class="mb-3 d-none" id="campoFechaFin">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h6 class="mb-0 text-warning fw-bold">
+                            <i class="bi bi-calendar-check me-2"></i>Fecha y Hora de Finalización del Proceso
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Nombre Proceso</label>
+                        <!-- CAMBIO: Array para múltiples formularios -->
+                        <input type="text" class="form-control" name="nombrep[]" placeholder="Nombre del proceso" required>
+                    </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Fecha y Hora (FIN DEL PROCESO COMPLETO)</label>
+                                <input type="datetime-local" class="form-control" name="fechaHoraFin" id="fechaHoraFin" required>
+                                <small class="text-muted">Esta será la fecha de finalización de todo el proceso de control</small>
                             </div>
 
-                            <!-- CONTENEDOR FORMULARIOS CON SCROLL INTERNO -->
-                            <div id="contenedorFormularios" class="mb-3"></div>
-                        </form>
-                    </div>
-                    
-                    <!-- Botones fijos en la parte inferior -->
-                    <div class="border-top p-3 bg-light">
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end d-none" id="botonesFormulario">
-                            <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
-                            </button>
-                            <button type="submit" class="btn btn-success" form="frmControlAutomatico">
-                                <i class="bi bi-check-circle me-1"></i>Crear Control
-                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- CONTENEDOR FORMULARIOS CON SCROLL INTERNO -->
+            <div id="contenedorFormularios" class="mb-3"></div>
+        </form>
+    </div>
+    
+    <!-- Botones fijos en la parte inferior -->
+    <div class="border-top p-3 bg-light">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end d-none" id="botonesFormulario">
+            <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+            </button>
+            <button type="submit" class="btn btn-success" form="frmControlAutomatico">
+                <i class="bi bi-check-circle me-1"></i>Crear Control
+            </button>
+        </div>
+    </div>
+</div>
+
             </div>
         </div>
 
@@ -118,8 +147,8 @@
                                 <tr>
                                     <th>Etapa</th>
                                     <th>Tipo</th>
-                                    <th>Programación</th>
-                                    <th>Temp</th>
+                                    <th>Máquina</th>
+                                    <th>Tiempo</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -149,24 +178,21 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Etapa</label>
                         <input type="text" class="form-control" name="etapa[]" placeholder="Nombre de la etapa" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Fecha y Hora</label>
-                        <input type="datetime-local" class="form-control" name="fechaHora[]" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Horas</label>
-                        <input type="number" class="form-control" name="horas[]" min="1" max="24" placeholder="Duración" required>
+                        <label class="form-label fw-semibold">Fecha y Hora (INICIO)</label>
+                        <input type="datetime-local" class="form-control" name="fechaHoraInicio[]" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Temperatura (°C)</label>
                         <input type="number" class="form-control" name="temperatura[]" step="0.1" placeholder="Temp. objetivo" required>
                     </div>
                 </div>
-                <input type="hidden" name="humedad[]" value="50">
+                <!-- <input type="hidden" name="humedad[]" value=""> -->
             </div>
         </div>
     </div>
@@ -174,34 +200,129 @@
     <!-- Template Formulario Cíclico -->
     <div id="templateFormularioCiclico" class="template-formulario">
         <div class="card mb-3 border-info">
-            <div class="card-header bg-info bg-opacity-10">
+            <!-- CAMBIO: Agregado botón eliminar y título dinámico -->
+            <div class="card-header bg-info bg-opacity-10 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 text-info fw-bold">
-                    <i class="bi bi-arrow-repeat me-2"></i>Control Cíclico
+                    <i class="bi bi-arrow-repeat me-2"></i>
+                    <span class="titulo-control">Control Cíclico #1</span>
                 </h6>
+                <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar d-none" onclick="eliminarFormulario(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Nombre Proceso</label>
+                        <!-- CAMBIO: Array para múltiples formularios -->
+                        <input type="text" class="form-control" name="nombrep[]" placeholder="Nombre del proceso" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Etapa</label>
-                        <input type="text" class="form-control" name="etapa" placeholder="Nombre de la etapa" required>
+                        <!-- CAMBIO: Array para múltiples formularios -->
+                        <input type="text" class="form-control" name="etapa[]" placeholder="Nombre de la etapa" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Hora</label>
-                        <input type="time" class="form-control" name="hora" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Horas</label>
-                        <input type="number" class="form-control" name="horas" min="1" max="24" placeholder="Duración" required>
+                        <!-- CAMBIO: Array para múltiples formularios -->
+                        <input type="time" class="form-control" name="hora[]" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Temperatura (°C)</label>
-                        <input type="number" class="form-control" name="temperatura" step="0.1" placeholder="Temp. objetivo" required>
+                        <!-- CAMBIO: Array para múltiples formularios -->
+                        <input type="number" class="form-control" name="temperatura[]" step="0.1" placeholder="Temp. objetivo" required>
                     </div>
                 </div>
-                <input type="hidden" name="humedad" value="50">
+                <!-- CAMBIO: Array para múltiples formularios -->
+                <!-- <input type="hidden" name="humedad[]" value=""> -->
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de Warning -->
+<div class="modal fade" id="modalWarning" tabindex="-1" aria-labelledby="modalWarningLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title" id="modalWarningLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Control Activo en Proceso
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="contenidoWarning">
+                <!-- El contenido se insertará dinámicamente desde el controlador -->
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger px-4" id="btnEliminarControlActivo">
+                    <i class="bi bi-trash me-1"></i>Eliminar y Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal de Éxito -->
+<div class="modal fade" id="modalExito" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title" id="modalExitoLabel">
+                    <i class="bi bi-check-circle-fill me-2"></i>¡Éxito!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h6 class="fw-bold text-success mb-2">Operación Exitosa</h6>
+                <p class="mb-0 text-muted" id="mensajeExito"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-check me-1"></i>Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Modal de Error -->
+<div class="modal fade" id="modalError" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="modalErrorLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Error
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-x-circle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h6 class="fw-bold text-danger mb-2">Ha ocurrido un error</h6>
+                <p class="mb-0 text-muted" id="mensajeError"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-danger px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x me-1"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <?php include "Views/templates/footer.php"; ?>
