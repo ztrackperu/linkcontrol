@@ -1,5 +1,5 @@
 <?php include "Views/templates/navbar.php"; ?>
-<div class="px-2 py-2">
+<div class="container-fluid px-2 py-2">
     <!-- TÍTULO GENERAL PROFESIONAL -->
     <div class="row mb-4">
         <div class="col-12">
@@ -61,22 +61,23 @@
         </div>
     </div>
 
-    <div class="col-12">
-        <div class="row">
-            <!-- FORMULARIO CREAR CONTROL -->
-            <div class="col-12 col-lg-6">
-                <div class="card shadow border-0">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Crear Control Automático</h5>
-                        <button type="button" class="btn btn-light btn-sm" id="btnAgregarUnico" style="display: none;" onclick="agregarFormularioUnico()">
-                            <i class="bi bi-plus-circle me-1"></i>Agregar
-                        </button>
-                    </div>
-                    <div class="card-body">
+    <div class="row">
+        <!-- FORMULARIO CREAR CONTROL -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Crear Control Automático</h5>
+                    <button type="button" class="btn btn-light btn-sm d-none" id="btnAgregarUnico" onclick="agregarFormularioUnico()">
+                        <i class="bi bi-plus-circle me-1"></i>Agregar
+                    </button>
+                </div>
+                <div class="card-body p-0 d-flex flex-column">
+                    <!-- Área de formulario con altura fija y scroll -->
+                    <div class="flex-grow-1 overflow-auto p-3" style="height: 500px; min-height: 500px;">
                         <form id="frmControlAutomatico">
                             <!-- SELECT OPCIÓN -->
                             <div class="mb-3">
-                                <label for="tipoControl" class="form-label">Opción</label>
+                                <label for="tipoControl" class="form-label fw-bold">Opción</label>
                                 <select class="form-select" id="tipoControl" name="tipoControl" required onchange="mostrarFormulario()">
                                     <option value="">Seleccionar...</option>
                                     <option value="unico">Único</option>
@@ -84,41 +85,47 @@
                                 </select>
                             </div>
 
-                            <!-- CONTENEDOR FORMULARIOS -->
-                            <div id="contenedorFormularios"></div>
-
-                            <!-- BOTONES -->
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end" id="botonesFormulario" style="display: none;">
-                                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
-                                <button type="submit" class="btn btn-success">Crear Control</button>
-                            </div>
+                            <!-- CONTENEDOR FORMULARIOS CON SCROLL INTERNO -->
+                            <div id="contenedorFormularios" class="mb-3"></div>
                         </form>
+                    </div>
+                    
+                    <!-- Botones fijos en la parte inferior -->
+                    <div class="border-top p-3 bg-light">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end d-none" id="botonesFormulario">
+                            <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                            </button>
+                            <button type="submit" class="btn btn-success" form="frmControlAutomatico">
+                                <i class="bi bi-check-circle me-1"></i>Crear Control
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- TABLA CONTROLES CREADOS -->
-            <div class="col-12 col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">Controles Automáticos</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="tablaControles">
-                                <thead>
-                                    <tr>
-                                        <th>Etapa</th>
-                                        <th>Tipo</th>
-                                        <th>Programación</th>
-                                        <th>Temp</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="contenidoTabla"></tbody>
-                            </table>
-                        </div>
+        <!-- TABLA CONTROLES CREADOS -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Controles Automáticos</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="height: 580px; overflow-y: auto;">
+                        <table class="table table-striped table-hover mb-0" id="tablaControles">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th>Etapa</th>
+                                    <th>Tipo</th>
+                                    <th>Programación</th>
+                                    <th>Temp</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contenidoTabla"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -126,121 +133,75 @@
     </div>
 </div>
 
-<script>
-let contadorFormularios = 0;
-
-function mostrarFormulario() {
-    const tipoControl = document.getElementById('tipoControl').value;
-    const btnAgregarUnico = document.getElementById('btnAgregarUnico');
-    const botonesFormulario = document.getElementById('botonesFormulario');
-    const contenedor = document.getElementById('contenedorFormularios');
-    
-    if (tipoControl) {
-        botonesFormulario.style.display = 'block';
-        
-        if (tipoControl === 'unico') {
-            btnAgregarUnico.style.display = 'block';
-            if (contadorFormularios === 0) {
-                agregarFormularioUnico();
-            }
-        } else {
-            btnAgregarUnico.style.display = 'none';
-            contenedor.innerHTML = crearFormularioCiclico();
-        }
-    } else {
-        btnAgregarUnico.style.display = 'none';
-        botonesFormulario.style.display = 'none';
-        contenedor.innerHTML = '';
-        contadorFormularios = 0;
-    }
-}
-
-function crearFormularioUnico(numero) {
-    return `
-        <div class="border rounded p-3 mb-3 bg-light" id="formulario-${numero}">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 text-primary">
-                    <i class="bi bi-gear-fill me-2"></i>Control Único #${numero}
+<!-- TEMPLATES OCULTOS -->
+<div class="d-none">
+    <!-- Template Formulario Único -->
+    <div id="templateFormularioUnico" class="template-formulario">
+        <div class="card mb-3 border-primary">
+            <div class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-primary fw-bold">
+                    <i class="bi bi-gear-fill me-2"></i>
+                    <span class="titulo-control">Control Único #1</span>
                 </h6>
-                ${numero > 1 ? `<button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarFormulario(${numero})">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-eliminar d-none" onclick="eliminarFormulario(this)">
                     <i class="bi bi-trash"></i>
-                </button>` : ''}
+                </button>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Etapa</label>
-                <input type="text" class="form-control" name="etapa[]" placeholder="Nombre de la etapa" required>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Etapa</label>
+                        <input type="text" class="form-control" name="etapa[]" placeholder="Nombre de la etapa" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-control" name="fechaHora[]" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Horas</label>
+                        <input type="number" class="form-control" name="horas[]" min="1" max="24" placeholder="Duración" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Temperatura (°C)</label>
+                        <input type="number" class="form-control" name="temperatura[]" step="0.1" placeholder="Temp. objetivo" required>
+                    </div>
+                </div>
+                <input type="hidden" name="humedad[]" value="50">
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Fecha y Hora</label>
-                <input type="datetime-local" class="form-control" name="fechaHora[]" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Horas</label>
-                <input type="number" class="form-control" name="horas[]" min="1" max="24" placeholder="Duración en horas" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Temperatura (°C)</label>
-                <input type="number" class="form-control" name="temperatura[]" step="0.1" placeholder="Temperatura objetivo" required>
-            </div>
-
-            <input type="hidden" name="humedad[]" value="50">
         </div>
-    `;
-}
+    </div>
 
-function crearFormularioCiclico() {
-    return `
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h6 class="mb-3 text-primary">
-                <i class="bi bi-arrow-repeat me-2"></i>Control Cíclico
-            </h6>
-            
-            <div class="mb-3">
-                <label class="form-label">Etapa</label>
-                <input type="text" class="form-control" name="etapa" placeholder="Nombre de la etapa" required>
+    <!-- Template Formulario Cíclico -->
+    <div id="templateFormularioCiclico" class="template-formulario">
+        <div class="card mb-3 border-info">
+            <div class="card-header bg-info bg-opacity-10">
+                <h6 class="mb-0 text-info fw-bold">
+                    <i class="bi bi-arrow-repeat me-2"></i>Control Cíclico
+                </h6>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Hora</label>
-                <input type="time" class="form-control" name="hora" required>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Etapa</label>
+                        <input type="text" class="form-control" name="etapa" placeholder="Nombre de la etapa" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Hora</label>
+                        <input type="time" class="form-control" name="hora" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Horas</label>
+                        <input type="number" class="form-control" name="horas" min="1" max="24" placeholder="Duración" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Temperatura (°C)</label>
+                        <input type="number" class="form-control" name="temperatura" step="0.1" placeholder="Temp. objetivo" required>
+                    </div>
+                </div>
+                <input type="hidden" name="humedad" value="50">
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Horas</label>
-                <input type="number" class="form-control" name="horas" min="1" max="24" placeholder="Duración en horas" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Temperatura (°C)</label>
-                <input type="number" class="form-control" name="temperatura" step="0.1" placeholder="Temperatura objetivo" required>
-            </div>
-
-            <input type="hidden" name="humedad" value="50">
         </div>
-    `;
-}
-
-function agregarFormularioUnico() {
-    contadorFormularios++;
-    const contenedor = document.getElementById('contenedorFormularios');
-    contenedor.insertAdjacentHTML('beforeend', crearFormularioUnico(contadorFormularios));
-}
-
-function eliminarFormulario(numero) {
-    document.getElementById(`formulario-${numero}`).remove();
-}
-
-function limpiarFormulario() {
-    document.getElementById('frmControlAutomatico').reset();
-    document.getElementById('contenedorFormularios').innerHTML = '';
-    document.getElementById('btnAgregarUnico').style.display = 'none';
-    document.getElementById('botonesFormulario').style.display = 'none';
-    contadorFormularios = 0;
-}
-</script>
+    </div>
+</div>
 
 <?php include "Views/templates/footer.php"; ?>
