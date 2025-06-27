@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeDateTime();
   initializeFormSubmit();
   ListarControl();
+  ListarHistorico();
+  cargarContadores();
 });
 
 // ===========================
@@ -286,6 +288,7 @@ function procesarFormulario() {
           mostrarModalExito(res.message);
           limpiarFormulario();
           ListarControl();
+          ListarHistorico();
         } else if (res.type === "control_activo") {
           console.log("Control activo detectado");
 
@@ -598,4 +601,82 @@ function extraerHoraDeFecha(fechaCustom) {
   }
 
   return "";
+}
+
+function ListarHistorico() {
+  const http = new XMLHttpRequest();
+  const url = base_url + "Automatico/listarHistorico";
+  http.open("POST", url, true);
+  http.send();
+  http.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      const res = JSON.parse(this.responseText);
+      mostrarHistoricoEnTabla(res);
+    }
+  };
+}
+
+function mostrarHistoricoEnTabla(data) {
+  const tbody = document.getElementById("contenidoTablaHistorico");
+  tbody.innerHTML = data;
+}
+
+// Agregar esta función
+function cargarContadores() {
+  const http = new XMLHttpRequest();
+  const url = base_url + "Automatico/obtenerContadores";
+  http.open("POST", url, true);
+  http.send();
+
+  http.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      try {
+        const res = JSON.parse(this.responseText);
+        if (res.success) {
+          actualizarContadoresEnVista(res.data);
+        } else {
+          console.error("Error al cargar contadores:", res.message);
+        }
+      } catch (error) {
+        console.error("Error al parsear contadores:", error);
+      }
+    }
+  };
+}
+
+function actualizarContadoresEnVista(data) {
+  // Actualizar contadores generales
+  document.getElementById("totalCreados").textContent = data.general.creado;
+  document.getElementById("totalEliminados").textContent =
+    data.general.eliminado;
+  document.getElementById("totalReestablecidos").textContent =
+    data.general.reestablecido;
+
+  // Actualizar contadores de hoy
+  document.getElementById("creadosHoy").textContent = data.hoy.creado;
+  document.getElementById("eliminadosHoy").textContent = data.hoy.eliminado;
+  document.getElementById("reestablecidosHoy").textContent =
+    data.hoy.reestablecido;
+
+  // AGREGAR ESTAS LÍNEAS PARA MOSTRAR LAS FECHAS:
+
+  // Formatear fechas desde created_at y updated_at
+  const fechaInicio = data.created_at
+    ? new Date(data.created_at).toLocaleDateString("es-PE")
+    : "N/A";
+  const fechaFin = data.updated_at
+    ? new Date(data.updated_at).toLocaleDateString("es-PE")
+    : "N/A";
+
+  // Mostrar rango de fechas generales
+  const rangoGeneral = `(${fechaInicio} - ${fechaFin})`;
+  document.querySelectorAll(".fecha-general").forEach((el) => {
+    el.textContent = rangoGeneral;
+  });
+
+  // Mostrar fecha de hoy formateada
+  const fechaHoyFormateada = `(${data.fecha_actual_formateada})`;
+  document.querySelectorAll(".fecha-hoy").forEach((el) => {
+    el.textContent = fechaHoyFormateada;
+  });
 }

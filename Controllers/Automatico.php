@@ -17,8 +17,8 @@ class Automatico extends Controller
     {
         $body = array(
             "especifico" => 0,
-            "id_usuario" => 1,
-             "tipo_usuario" => 1
+            "id_usuario" => 0
+            
         );
         
         $response = $this->model->obtenerControles($body);
@@ -28,9 +28,9 @@ class Automatico extends Controller
         $html = '';
         
         if (empty($data['data']['resultado'])) {
-            $html = '<tr><td colspan="6" class="text-center text-muted py-4">
+            $html = '<tr><td colspan="8" class="text-center text-muted py-4">
                         <i class="bi bi-inbox fs-1"></i>
-                        <p class="mb-0 mt-2">No hay controles registrados</p>
+                        <p class="mb-0 mt-2">No hay controles Activos</p>
                      </td></tr>';
         } else {
             $index = 1;
@@ -72,6 +72,73 @@ class Automatico extends Controller
         echo json_encode($html, JSON_UNESCAPED_UNICODE);
         die();
     }
+
+    public function listarHistorico()
+{
+    $body = array(
+        "especifico" => 0,
+        "id_usuario" =>  $_SESSION['id_ztrack'],
+        "tipo_usuario" =>  $_SESSION['permiso_ztrack']  // Cambio aquí para obtener histórico
+    );
+    
+    $response = $this->model->obtenerControles($body);
+    $data = json_decode($response, true);
+    
+    // Inicializar $html AQUÍ
+    $html = '';
+    
+    if (empty($data['data']['resultado'])) {
+        $html = '<tr><td colspan="8" class="text-center text-muted py-4">
+                    <i class="bi bi-archive fs-1"></i>
+                    <p class="mb-0 mt-2">No hay controles en el histórico</p>
+                 </td></tr>';
+    } else {
+        $index = 1;
+        foreach ($data['data']['resultado'] as $control) {
+            $tipoTexto = $control['tipo_control_temperatura'] == 0 ? 'Único' : 'Cíclico';
+            $tipoBadge = $control['tipo_control_temperatura'] == 0 ? 'bg-primary' : 'bg-info';
+            $estadoTexto = $control['estado_control_temperatura'] == 1 ? 'Activo' : 'Inactivo';
+            $estadoBadge = $control['estado_control_temperatura'] == 1 ? 'bg-success' : 'bg-danger';
+            
+            $condicionTexto = $control['condicion_control_temperatura'] == 1 ? 'En proceso' : 'Completado';
+            $condicionBadge = $control['condicion_control_temperatura'] == 1 ? 'bg-warning' : 'bg-success';
+            
+            // Obtener el ID real del control
+            $idControl = $control['id_control_temperatura'];
+            
+            // Formatear fecha de creación
+            $fechaCreacion = isset($control['created_at']) ? 
+                date('d/m/Y H:i', strtotime($control['created_at'])) : 'N/A';
+            
+            $html .= '<tr>
+                <td class="fw-semibold">Control ' . $index . '</td>
+                <td><span class="badge ' . $tipoBadge . '">' . $tipoTexto . '</span></td>
+                <td class="small">
+                    <i class="bi bi-device-hdd me-1"></i>' . $control['imei_control_temperatura'] . '
+                </td>
+                <td><span class="badge bg-primary text-white">' . $control['total_control_temperatura'] . '</span></td>
+                <td><span class="badge ' . $estadoBadge . '">' . $estadoTexto . '</span></td>
+                <td><span class="badge ' . $condicionBadge . '">' . $condicionTexto . '</span></td>
+                <td class="small text-muted">' . $fechaCreacion . '</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary btn-sm" onclick="verControl(' . $idControl . ')">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarControl(' . $idControl . ')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>';
+            $index++;
+        }
+    }
+    
+    echo json_encode($html, JSON_UNESCAPED_UNICODE);
+    die();
+}
+
     
     public function crear()
     {
@@ -511,6 +578,103 @@ public function eliminarControl()
     }
     die();
 }
+
+
+public function obtenerContadores()
+{
+
+    $body = array(
+        "especifico" => 0,
+        "id_usuario" => $_SESSION['id_ztrack'],
+        "tipo_usuario" => $_SESSION['permiso_ztrack'] 
+    );
+
+    $response = $this->model->obtenerContadores($body);
+    $result = json_decode($response, true);
+    
+    if ($result && $result['code'] == 200 && isset($result['data'])) {
+        $data = $result['data'];
+        
+        // Obtener fecha de hoy en formato dd_mm_yyyy
+        $fechaHoy = date('d_m_Y');
+        
+        // Buscar todas las fechas disponibles (excluyendo campos especiales)
+        $fechasDisponibles = array();
+        $camposEspeciales = ['general', 'modulo', 'created_at', 'updated_at'];
+        
+        foreach ($data as $key => $value) {
+            if (!in_array($key, $camposEspeciales) && is_array($value)) {
+                $fechasDisponibles[] = $key;
+            }
+        }
+        
+        // Ordenar fechas (más reciente primero)
+        rsort($fechasDisponibles);
+        
+        // Preparar respuesta con contadores
+        $contadores = array(
+            'general' => array(
+                'creado' => $data['general']['creado'] ?? 0,
+                'eliminado' => $data['general']['eliminado'] ?? 0,
+                'reestablecido' => $data['general']['reestablecido'] ?? 0
+            ),
+            'hoy' => array(
+                'creado' => $data[$fechaHoy]['creado'] ?? 0,
+                'eliminado' => $data[$fechaHoy]['eliminado'] ?? 0,
+                'reestablecido' => $data[$fechaHoy]['reestablecido'] ?? 0
+            ),
+            'fecha_actual' => $fechaHoy,
+            'fecha_actual_formateada' => $this->formatearFechaCustom(str_replace('_', '-', $fechaHoy) . '_00-00'),
+            'fechas_disponibles' => $fechasDisponibles,
+            'fechas_formateadas' => $this->formatearFechasArray($fechasDisponibles),
+            'todas_las_fechas' => $this->obtenerDatosPorFechas($data, $fechasDisponibles),
+            'updated_at' => $data['updated_at'] ?? null,
+            'created_at' => $data['created_at'] ?? null
+        );
+        
+        echo json_encode(array(
+            'success' => true,
+            'data' => $contadores
+        ));
+    } else {
+        echo json_encode(array(
+            'success' => false,
+            'message' => 'Error al obtener contadores'
+        ));
+    }
+    die();
+}
+
+private function formatearFechasArray($fechas)
+{
+    $fechasFormateadas = array();
+    foreach ($fechas as $fecha) {
+        // Usar tu función existente formatearFechaCustom
+        // Convertir dd_mm_yyyy a dd-mm-yyyy_00-00 para que funcione con tu función
+        $fechaConvertida = str_replace('_', '-', $fecha) . '_00-00';
+        $fechasFormateadas[$fecha] = $this->formatearFechaCustom($fechaConvertida);
+    }
+    return $fechasFormateadas;
+}
+
+private function obtenerDatosPorFechas($data, $fechas)
+{
+    $datosPorFechas = array();
+    foreach ($fechas as $fecha) {
+        if (isset($data[$fecha])) {
+            // Convertir dd_mm_yyyy a dd-mm-yyyy_00-00 para que funcione con tu función
+            $fechaConvertida = str_replace('_', '-', $fecha) . '_00-00';
+            $datosPorFechas[$fecha] = array(
+                'creado' => $data[$fecha]['creado'] ?? 0,
+                'eliminado' => $data[$fecha]['eliminado'] ?? 0,
+                'reestablecido' => $data[$fecha]['reestablecido'] ?? 0,
+                'fecha_formateada' => $this->formatearFechaCustom($fechaConvertida)
+            );
+        }
+    }
+    return $datosPorFechas;
+}
+
 
 
 }

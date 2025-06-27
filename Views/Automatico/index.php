@@ -3,7 +3,8 @@
     <!-- TÍTULO GENERAL PROFESIONAL -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card border-0 shadow-lg text-white bg-black bg-opacity-40">
+
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
@@ -29,37 +30,72 @@
                         </div>
                     </div>
                     
-                    <!-- Indicadores de estado -->
-                    <div class="row mt-4 g-3">
-                        <div class="col-md-3 col-6">
-                            <div class="text-center bg-white bg-opacity-10 rounded p-3">
-                                <div class="h3 mb-1 fw-bold" id="totalControles">0</div>
-                                <small class="opacity-75">Controles Activos</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="text-center bg-white bg-opacity-10 rounded p-3">
-                                <div class="h3 mb-1 fw-bold text-warning" id="controlesEjecutandose">0</div>
-                                <small class="opacity-75">En Ejecución</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="text-center bg-white bg-opacity-10 rounded p-3">
-                                <div class="h3 mb-1 fw-bold text-info" id="controlesProgramados">0</div>
-                                <small class="opacity-75">Programados</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="text-center bg-white bg-opacity-10 rounded p-3">
-                                <div class="h3 mb-1 fw-bold text-danger" id="alertasActivas">0</div>
-                                <small class="opacity-75">Alertas</small>
-                            </div>
-                        </div>
-                    </div>
+ <!-- Indicadores de estado -->
+<div class="row mt-4 g-3">
+    <!-- Header -->
+    <div class="col-12 mb-2">
+        <h6 class="text-white mb-0 opacity-75 fw-semibold">
+            <i class="bi bi-graph-up me-2"></i>Panel de Control
+        </h6>
+    </div>
+    
+    <!-- Fila 1: Totales Generales -->
+    <div class="col-md-4 col-12">
+        <div class="text-center border border-success border-opacity-50 rounded p-3 bg-success bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-success" id="totalCreados">0</div>
+            <small class="text-success fw-bold">Total Creados</small>
+            <div><small class="text-success opacity-75 fecha-general">(General)</small></div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-12">
+        <div class="text-center border border-danger border-opacity-50 rounded p-3 bg-danger bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-danger" id="totalEliminados">0</div>
+            <small class="text-danger fw-bold">Total Eliminados</small>
+            <div><small class="text-danger opacity-75 fecha-general">(General)</small></div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-12">
+        <div class="text-center border border-info border-opacity-50 rounded p-3 bg-info bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-info" id="totalReestablecidos">0</div>
+            <small class="text-info fw-bold">Total Reestablecidos</small>
+            <div><small class="text-info opacity-75 fecha-general">(General)</small></div>
+        </div>
+    </div>
+    
+    <!-- Fila 2: Datos de Hoy -->
+    <div class="col-md-4 col-12">
+    <div class="text-center border border-success border-opacity-50 rounded p-3 bg-success bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-success" id="creadosHoy">0</div>
+            <small class="text-success fw-bold">Creados Hoy</small>
+            <div><small class="text-success opacity-75 fecha-hoy">(Hoy)</small></div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-12">
+    <div class="text-center border border-danger border-opacity-50 rounded p-3 bg-danger bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-danger" id="eliminadosHoy">0</div>
+            <small class="text-danger fw-bold">Eliminados Hoy</small>
+            <div><small class="text-danger opacity-75 fecha-hoy">(Hoy)</small></div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-12">
+    <div class="text-center border border-info border-opacity-50 rounded p-3 bg-info bg-opacity-10">
+            <div class="h4 mb-1 fw-bold text-info" id="reestablecidosHoy">0</div>
+            <small class="text-info fw-bold">Reestablecidos Hoy</small>
+            <div><small class="text-info opacity-75 fecha-hoy">(Hoy)</small></div>
+        </div>
+    </div>
+</div>
+
+</div>
                 </div>
             </div>
         </div>
-    </div>
+     
+
 
     <div class="row">
         <!-- FORMULARIO CREAR CONTROL -->
@@ -162,6 +198,42 @@
         </div>
     </div>
 </div>
+
+<!-- Agregar esta nueva sección después de la tabla de controles activos -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-archive me-2"></i>Histórico de Controles
+                </h5>
+                <button type="button" class="btn btn-light btn-sm" onclick="ListarHistorico()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="height: 400px; overflow-y: auto;">
+                    <table class="table table-striped table-hover mb-0" id="tablaHistorico">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>Nombre Proceso</th>
+                                <th>Tipo</th>
+                                <th>IMEI</th>
+                                <th>Etapas</th>
+                                <th>Estado</th>
+                                <th>Condición</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contenidoTablaHistorico"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- TEMPLATES OCULTOS -->
 <div class="d-none">
