@@ -97,15 +97,24 @@ function generar_tabla(datatable){
         responsive: true,
         columns: [
             { 'data': 'created_at' },
+            { 'data': 'power_kwh' },
+            { 
+                'data': 'power_state' ,
+                'render': function(data, type, row) {
+                    return data === 1 ? "ON" : "OFF"; // Cambia 0 por "ON" y 1 por "OFF"
+                }
+            },
             { 'data': 'set_point' },
-            { 'data': 'return_air' },
             { 'data': 'temp_supply_1' },
+            { 'data': 'return_air' },
+             { 'data': 'compress_coil_1' },
+            { 'data': 'humidity_set_point' },
             { 'data': 'relative_humidity' },
             { 'data': 'ambient_air' },
             { 'data': 'evaporation_coil' },
-            { 'data': 'compress_coil_1' },
-            { 'data': 'power_kwh' },
-            { 'data': 'power_state' }
+            { 'data': 'consumption_ph_1' },
+            { 'data': 'consumption_ph_2' },
+            { 'data': 'consumption_ph_3' }
         ],
         order: [[0, 'desc']],
         language: 'es',

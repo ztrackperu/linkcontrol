@@ -59,15 +59,16 @@
 
                     <span class="text-uppercase">Manual Control</span>
                 </a>
+            <!--
             </li>
                         <li class="sidebar-item">
                 <a href="<?php echo base_url?>AdminPage" class="sidebar-link">
-                    <!--<i class="bi bi-wind"></i>-->
                     <i class="ri-settings-3-fill"></i>
 
                     <span class="text-uppercase">Cycle Control </span>
                 </a>
             </li>
+            -->
             <li class="sidebar-item">
                 <a href="<?php echo base_url?>Graph" class="sidebar-link">
                     <i class="ri-line-chart-fill"></i>

@@ -33,21 +33,25 @@
                 <div class="card">
                     <div class="card-body">
                         <!--CONTENEDOR -->
-                        <h1 class="fw-bold fs-4" id="titleData"></h1>
+                        <h1 class="fw-bold fs-4" id="titleData">General Data</h1>
                         <div class="table-responsive mt-5">
                             <table class="table table-bordered table-hover" style="width:100%" id="tblDatos">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>Created At</th>
+                                        <th>Date</th>
+                                        <th>Meter</th>
+                                        <th>State</th>
                                         <th>Set Point</th>
-                                        <th>Return Air</th>
-                                        <th>Temp Supply</th>
-                                        <th>Relative Humidity</th>
-                                        <th>Ambient Air</th>
-                                        <th>Evaporation Coil</th>
-                                        <th>Compresor</th>
-                                        <th>Consumo</th>
-                                        <th>Power State</th>
+                                        <th>Supply</th>
+                                        <th>Return</th>
+                                        <th>Compress</th>
+                                        <th>Set H</th>
+                                        <th>Humidity</th>
+                                        <th>Ambient </th>
+                                        <th>Evaporation</th>
+                                        <th>Phase 1</th>
+                                        <th>Phase 2</th>
+                                        <th>Phase 3</th>
                                     </tr>
                                 </thead>
                                 <tbody>
