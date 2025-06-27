@@ -145,11 +145,12 @@
                         <table class="table table-striped table-hover mb-0" id="tablaControles">
                             <thead class="table-dark sticky-top">
                                 <tr>
-                                    <th>Etapa</th>
+                                    <th>Nombre Proceso</th>
                                     <th>Tipo</th>
-                                    <th>Máquina</th>
-                                    <th>Tiempo</th>
+                                    <th>IMEI</th>
+                                    <th>Etapas</th>
                                     <th>Estado</th>
+                                    <th>Condicion</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -212,11 +213,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Nombre Proceso</label>
-                        <!-- CAMBIO: Array para múltiples formularios -->
-                        <input type="text" class="form-control" name="nombrep[]" placeholder="Nombre del proceso" required>
-                    </div>
+                    
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Etapa</label>
                         <!-- CAMBIO: Array para múltiples formularios -->
@@ -257,9 +254,10 @@
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
                     <i class="bi bi-x me-1"></i>Cancelar
                 </button>
-                <button type="button" class="btn btn-danger px-4" id="btnEliminarControlActivo">
-                    <i class="bi bi-trash me-1"></i>Eliminar y Continuar
-                </button>
+                <button type="button" class="btn btn-danger px-4" onclick="eliminarControlActivoYContinuar()">
+    <i class="bi bi-trash me-1"></i>Eliminar y Continuar
+</button>
+
             </div>
         </div>
     </div>
@@ -322,6 +320,94 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Ver Control -->
+<div class="modal fade" id="modalVerControl" tabindex="-1" aria-labelledby="modalVerControlLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white border-0">
+                <h5 class="modal-title" id="modalVerControlLabel">
+                    <i class="bi bi-eye-fill me-2"></i>Detalles del Control
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="contenidoVerControl">
+                <!-- El HTML del controlador se insertará aquí -->
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x me-1"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Eliminar Control - Versión Profesional -->
+<div class="modal fade" id="modalEliminarControl" tabindex="-1" aria-labelledby="modalEliminarControlLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                <h5 class="modal-title text-white fw-bold" id="modalEliminarControlLabel">
+                    <i class="bi bi-shield-exclamation me-2"></i>Confirmación Requerida
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-trash3-fill text-danger" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h4 class="text-dark mb-3 fw-bold">¿Eliminar Control?</h4>
+                <p class="text-muted mb-4 px-3">
+                    Esta acción eliminará permanentemente el control seleccionado junto con todas sus etapas programadas. 
+                    <strong>Esta operación no se puede deshacer.</strong>
+                </p>
+                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-warning-emphasis">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Advertencia:</strong> Se perderán todos los datos asociados
+                </div>
+                <input type="hidden" id="idControlEliminar" value="">
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light btn-lg px-4 me-2" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger btn-lg px-4" onclick="confirmarEliminacion()">
+                    <i class="bi bi-trash3 me-2"></i>Sí, Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Éxito Eliminación -->
+<div class="modal fade" id="modalExitoEliminacion" tabindex="-1" aria-labelledby="modalExitoEliminacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <h5 class="modal-title text-white fw-bold" id="modalExitoEliminacionLabel">
+                    <i class="bi bi-check-circle-fill me-2"></i>Operación Exitosa
+                </h5>
+            </div>
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h4 class="text-dark mb-3 fw-bold">¡Control Eliminado!</h4>
+                <p class="text-muted mb-0">
+                    El control ha sido eliminado exitosamente del sistema.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 
 
