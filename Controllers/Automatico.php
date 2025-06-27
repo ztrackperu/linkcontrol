@@ -17,7 +17,8 @@ class Automatico extends Controller
     {
         $body = array(
             "especifico" => 0,
-            "id_usuario" => 0
+            "id_usuario" => 1,
+             "tipo_usuario" => 1
         );
         
         $response = $this->model->obtenerControles($body);
