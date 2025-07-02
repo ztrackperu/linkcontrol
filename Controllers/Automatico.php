@@ -140,15 +140,25 @@ class Automatico extends Controller
 }
 
     
-    public function crear()
+public function crear()
     {
         $tipoControl = $_POST['tipoControl'];
         
+        // Determinar el tipo numérico
+        $tipoNumerico = 0; // Por defecto único
+        if ($tipoControl === "unico") {
+            $tipoNumerico = 0;
+        } else if ($tipoControl === "ciclico") {
+            $tipoNumerico = 1;
+        } else if ($tipoControl === "periodico") {
+            $tipoNumerico = 0; // CAMBIADO: Periódico también es tipo 0
+        }
+        
         // Construir el JSON según el formato requerido
         $jsonData = array(
-            "proceso_control_temperatura" => $_POST['nombrep'][0] ?? $_POST['nombrep'],
-            "tipo_control_temperatura" => $tipoControl === "unico" ? 0 : 1,
-            "user_c" => 0,
+            "proceso_control_temperatura" => "",
+            "tipo_control_temperatura" => $tipoNumerico,
+            "user_c" => $_SESSION['id_ztrack'], // ID del usuario logueado
             "lista_control_temperatura" => array()
         );
         
@@ -157,6 +167,9 @@ class Automatico extends Controller
             $etapas = $_POST['etapa'];
             $fechasInicio = $_POST['fechaHoraInicio'];
             $temperaturas = $_POST['temperatura'];
+            
+            // Nombre del proceso para único
+            $jsonData['proceso_control_temperatura'] = $_POST['nombrep'] ?? 'Proceso Único';
             
             // Usar la fecha fin ingresada por el usuario
             if (!empty($_POST['fechaHoraFin'])) {
@@ -170,17 +183,63 @@ class Automatico extends Controller
                     "hora_inicio_etapa" => $this->convertirFechaFormato($fechasInicio[$i]),
                     "nombre_etapa" => $etapas[$i],
                     "temperatura_etapa" => floatval($temperaturas[$i])
+                    // Único no tiene humedad
                 );
             }
+            
+        } else if ($tipoControl === "periodico") {
+            // Procesar formularios periódicos con lógica de ciclos
+            $etapas = $_POST['etapa'];
+            $fechasHorasInicio = $_POST['fechaHoraInicio']; // Fechas y horas de inicio de cada etapa template
+            $temperaturas = $_POST['temperatura'];
+            $humedades = $_POST['humedad'];
+            $duraciones = $_POST['duracion']; // Duración de cada etapa en horas
+            
+            // Nombre del proceso para periódico
+            $jsonData['proceso_control_temperatura'] = $_POST['nombreProcesoPeriodico'] ?? 'Proceso Periódico';
+            
+            // Horas totales del proceso
+            $horasProceso = floatval($_POST['horasProceso'] ?? 24);
+            
+            // Fecha y hora de inicio del proceso completo (tomar la primera fecha como referencia)
+            $fechaHoraInicioProceso = !empty($fechasHorasInicio[0]) ? $fechasHorasInicio[0] : date('Y-m-d\TH:i');
+            
+            // Agregar campos específicos para periódico según el JSON de ejemplo
+            $jsonData['Hora inicio'] = $this->convertirFechaFormato($fechaHoraInicioProceso);
+            $jsonData['Horas_proceso'] = $horasProceso;
+            
+            // Calcular fecha fin basada en horas del proceso
+            $fechaInicio = DateTime::createFromFormat('Y-m-d\TH:i', $fechaHoraInicioProceso);
+            if (!$fechaInicio) {
+                $fechaInicio = new DateTime();
+            }
+            $fechaFin = clone $fechaInicio;
+            $fechaFin->add(new DateInterval('PT' . intval($horasProceso) . 'H'));
+            $jsonData['hora_fin_control_temperatura'] = $fechaFin->format('d-m-Y_H-i');
+            
+            // Generar el ciclo automático de etapas hasta completar las horas totales
+            $etapasCiclo = $this->generarCicloPeriodico(
+                $etapas, 
+                $fechasHorasInicio, 
+                $temperaturas, 
+                $humedades, 
+                $duraciones, 
+                $horasProceso, 
+                $fechaHoraInicioProceso
+            );
+            
+            $jsonData['lista_control_temperatura'] = $etapasCiclo;
             
         } else if ($tipoControl === "ciclico") {
             // Procesar formularios cíclicos
             $etapas = $_POST['etapa'];
             $horas = $_POST['hora'];
             $temperaturas = $_POST['temperatura'];
-            $jsonData['hora_fin_control_temperatura'] = 'No tiene hora de finalización, se repetirá indefinidamente';
             
-          
+            // Nombre del proceso para cíclico
+            $jsonData['proceso_control_temperatura'] = $_POST['nombrep'] ?? 'Proceso Cíclico';
+            
+            $jsonData['hora_fin_control_temperatura'] = 'No tiene hora de finalización, se repetirá indefinidamente';
             
             for ($i = 0; $i < count($etapas); $i++) {
                 // Para cíclico, usar solo la hora (sin fecha específica)
@@ -191,6 +250,7 @@ class Automatico extends Controller
                     "hora_inicio_etapa" => $this->convertirFechaFormato($horaCompleta),
                     "nombre_etapa" => $etapas[$i],
                     "temperatura_etapa" => floatval($temperaturas[$i])
+                    // Cíclico no tiene humedad
                 );
             }
         }
@@ -211,7 +271,7 @@ class Automatico extends Controller
             // Obtener detalles del control activo
             $body = array(
                 "especifico" => $id_control,
-                "id_usuario" => 0
+                "id_usuario" => $_SESSION['id_ztrack']
             );
             
             $detallesResponse = $this->model->verControl($body);
@@ -234,7 +294,7 @@ class Automatico extends Controller
             } else {
                 echo json_encode(array('success' => false, 'message' => 'Error al obtener detalles del control activo'));
             }
-        } 
+        }
         // DESPUÉS VERIFICAR SI ES ÉXITO
         else if ($result && $result['code'] == 200 && $result['message'] == "ok") {
             // Si hay data con id_control_temperatura, es éxito
@@ -251,6 +311,68 @@ class Automatico extends Controller
         die();
     }
     
+    /**
+     * Genera el ciclo periódico de etapas hasta completar las horas totales
+     * Basado en el JSON de ejemplo proporcionado
+     */
+    private function generarCicloPeriodico($etapas, $fechasHorasInicio, $temperaturas, $humedades, $duraciones, $horasTotales, $fechaHoraInicioProceso)
+    {
+        $etapasCiclo = array();
+        $horasAcumuladas = 0;
+        $indiceEtapa = 0;
+        $contadorCiclo = 0;
+        
+        // Convertir fecha de inicio del proceso a DateTime
+        $fechaActual = DateTime::createFromFormat('Y-m-d\TH:i', $fechaHoraInicioProceso);
+        if (!$fechaActual) {
+            // Si no se puede parsear, usar la primera fecha del formulario
+            $fechaActual = DateTime::createFromFormat('Y-m-d\TH:i', $fechasHorasInicio[0]);
+            if (!$fechaActual) {
+                $fechaActual = new DateTime(); // Fallback a fecha actual
+            }
+        }
+        
+        while ($horasAcumuladas < $horasTotales) {
+            // Obtener datos de la etapa actual del ciclo
+            $nombreEtapa = $etapas[$indiceEtapa];
+            $temperatura = floatval($temperaturas[$indiceEtapa]);
+            $humedad = $humedades[$indiceEtapa];
+            $duracion = floatval($duraciones[$indiceEtapa]);
+            
+            // Verificar si agregar esta etapa completa excedería las horas totales
+            if (($horasAcumuladas + $duracion) > $horasTotales) {
+                // Ajustar la duración para no exceder las horas totales
+                $duracion = $horasTotales - $horasAcumuladas;
+            }
+            
+            // Agregar la etapa al ciclo con el formato del JSON de ejemplo
+            $etapasCiclo[] = array(
+                "hora_inicio_etapa" => $fechaActual->format('d-m-Y_H-i'),
+                "nombre_etapa" => $nombreEtapa,
+                "temperatura_etapa" => $temperatura,
+                "humedad" => $humedad . "%",
+                "duracion" => $duracion
+            );
+            
+            // Actualizar contadores y fecha para la siguiente etapa
+            $horasAcumuladas += $duracion;
+            
+            // Calcular la fecha de inicio de la siguiente etapa
+            $minutosAgregar = intval($duracion * 60); // Convertir horas a minutos
+            $fechaActual->add(new DateInterval('PT' . $minutosAgregar . 'M'));
+            
+            // Avanzar al siguiente índice de etapa (ciclo circular)
+            $indiceEtapa = ($indiceEtapa + 1) % count($etapas);
+            $contadorCiclo++;
+            
+            // Protección contra bucle infinito
+            if ($contadorCiclo > 1000) {
+                break;
+            }
+        }
+        
+        return $etapasCiclo;
+    }
     
     
     private function construirHtmlControlActivo($controlActivo)
@@ -316,12 +438,39 @@ class Automatico extends Controller
     }
 
 
-private function convertirFechaFormato($fechaHtml)
-{
-    // Convertir de "2025-06-25T17:42" a "25-06-2025_17-42"
-    $fecha = new DateTime($fechaHtml);
-    return $fecha->format('d-m-Y_H-i');
-}
+    
+    
+    /**
+     * Convierte fecha del formato HTML5 al formato requerido
+     */
+    private function convertirFechaFormato($fechaHtml)
+    {
+        try {
+            // Intentar parsear formato HTML5 datetime-local
+            $fecha = DateTime::createFromFormat('Y-m-d\TH:i', $fechaHtml);
+            if ($fecha) {
+                return $fecha->format('d-m-Y_H-i');
+            }
+            
+            // Intentar otros formatos comunes
+            $fecha = DateTime::createFromFormat('Y-m-d H:i:s', $fechaHtml);
+            if ($fecha) {
+                return $fecha->format('d-m-Y_H-i');
+            }
+            
+            $fecha = DateTime::createFromFormat('Y-m-d H:i', $fechaHtml);
+            if ($fecha) {
+                return $fecha->format('d-m-Y_H-i');
+            }
+            
+        } catch (Exception $e) {
+            // Si hay error, continuar con fallback
+        }
+        
+        // Fallback: retornar fecha actual
+        return date('d-m-Y_H-i');
+    }
+    
 
 
 

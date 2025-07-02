@@ -23,6 +23,7 @@ class AutomaticoModel extends Query
 public function crearControl($data)
 {
  
+   
     $ch = curl_init();
     $jsonData = json_encode($data);
     curl_setopt($ch, CURLOPT_URL, urlapicontrol."/Control/");

@@ -34,7 +34,6 @@ function updateCurrentTime() {
     day: "2-digit",
     hour12: true,
   });
-
   const timeElement = document.getElementById("currentTime");
   if (timeElement) {
     timeElement.textContent = dateTimeString;
@@ -50,6 +49,9 @@ function mostrarFormulario() {
   const botonesFormulario = document.getElementById("botonesFormulario");
   const contenedor = document.getElementById("contenedorFormularios");
   const campoFechaFin = document.getElementById("campoFechaFin");
+  const campoProcesoPeriodico = document.getElementById(
+    "campoProcesoPeriodico"
+  );
 
   // Limpiar contenedor y resetear contador
   contenedor.innerHTML = "";
@@ -61,16 +63,58 @@ function mostrarFormulario() {
     botonesFormulario.classList.remove("d-none");
     btnAgregar.classList.remove("d-none");
 
-    // Mostrar campo fecha fin para ambos tipos
-    if (campoFechaFin) {
-      campoFechaFin.classList.remove("d-none");
+    // Mostrar/ocultar campos según el tipo
+    if (tipoControl === "periodico") {
+      if (campoProcesoPeriodico) {
+        campoProcesoPeriodico.classList.remove("d-none");
+        // ELIMINAR ESTA LÍNEA - NO habilitar/deshabilitar campos
+        // habilitarValidacionCampos(campoProcesoPeriodico, true);
+      }
+      if (campoFechaFin) {
+        campoFechaFin.classList.add("d-none");
+        // ELIMINAR ESTA LÍNEA - NO habilitar/deshabilitar campos
+        // habilitarValidacionCampos(campoFechaFin, false);
+      }
+      // Crear 2 formularios por defecto para periódico
+      agregarFormulario();
+      agregarFormulario();
+      actualizarBotonesEliminar();
+    } else {
+      // Para único y cíclico: mostrar fecha fin
+      if (campoFechaFin) {
+        campoFechaFin.classList.remove("d-none");
+        // ELIMINAR ESTA LÍNEA - NO habilitar/deshabilitar campos
+        // habilitarValidacionCampos(campoFechaFin, true);
+      }
+      if (campoProcesoPeriodico) {
+        campoProcesoPeriodico.classList.add("d-none");
+        // ELIMINAR ESTA LÍNEA - NO habilitar/deshabilitar campos
+        // habilitarValidacionCampos(campoProcesoPeriodico, false);
+      }
+      // Agregar primer formulario
+      agregarFormulario();
     }
-
-    // Agregar primer formulario
-    agregarFormulario();
   } else {
     resetearFormularios();
   }
+}
+
+// NUEVA FUNCIÓN: Habilitar/deshabilitar validación de campos
+function habilitarValidacionCampos(contenedor, habilitar) {
+  if (!contenedor) return;
+
+  const campos = contenedor.querySelectorAll(
+    "input[required], select[required], textarea[required]"
+  );
+  campos.forEach((campo) => {
+    if (habilitar) {
+      campo.setAttribute("required", "");
+      campo.disabled = true;
+    } else {
+      campo.removeAttribute("required");
+      campo.disabled = false;
+    }
+  });
 }
 
 function agregarFormulario() {
@@ -78,6 +122,8 @@ function agregarFormulario() {
     agregarFormularioUnico();
   } else if (tipoControlActual === "ciclico") {
     agregarFormularioCiclico();
+  } else if (tipoControlActual === "periodico") {
+    agregarFormularioPeriodico();
   }
 }
 
@@ -106,6 +152,56 @@ function agregarFormularioCiclico() {
   actualizarTituloFormulario(clone, "Cíclico");
   mostrarBotonEliminarSiEsNecesario(clone);
   document.getElementById("contenedorFormularios").appendChild(clone);
+}
+
+function agregarFormularioPeriodico() {
+  contadorFormularios++;
+  const template = document.getElementById("templateFormularioPeriodico");
+  if (!template) return;
+
+  const clone = template.firstElementChild.cloneNode(true);
+  clone.id = `formulario-periodico-${contadorFormularios}`;
+  actualizarTituloFormulario(clone, "Periódico");
+  mostrarBotonEliminarSiEsNecesario(clone);
+
+  // Configurar valores por defecto para formulario periódico
+  configurarValoresPorDefectoPeriodico(clone);
+
+  document.getElementById("contenedorFormularios").appendChild(clone);
+}
+
+function configurarValoresPorDefectoPeriodico(clone) {
+  // Configurar fecha y hora por defecto (fecha actual)
+  const campoFechaHora = clone.querySelector('input[name="fechaHoraInicio[]"]');
+  if (campoFechaHora) {
+    const ahora = new Date();
+    const fechaFormateada = ahora.toISOString().slice(0, 16);
+    campoFechaHora.value = fechaFormateada;
+  }
+
+  // Configurar nombre de etapa por defecto
+  const campoEtapa = clone.querySelector('input[name="etapa[]"]');
+  if (campoEtapa) {
+    campoEtapa.value = `Etapa ${contadorFormularios}`;
+  }
+
+  // Configurar temperatura por defecto
+  const campoTemperatura = clone.querySelector('input[name="temperatura[]"]');
+  if (campoTemperatura) {
+    campoTemperatura.value = 20.0;
+  }
+
+  // Configurar humedad por defecto
+  const campoHumedad = clone.querySelector('input[name="humedad[]"]');
+  if (campoHumedad) {
+    campoHumedad.value = 50;
+  }
+
+  // Configurar duración por defecto
+  const campoDuracion = clone.querySelector('input[name="duracion[]"]');
+  if (campoDuracion) {
+    campoDuracion.value = 2.0; // 2 horas por defecto
+  }
 }
 
 function actualizarTituloFormulario(clone, tipo) {
@@ -139,8 +235,15 @@ function actualizarNumeracion() {
   const formularios = document.querySelectorAll(
     "#contenedorFormularios .titulo-control"
   );
+  let tipoTexto = "Control";
 
-  const tipoTexto = tipoControlActual === "unico" ? "Único" : "Cíclico";
+  if (tipoControlActual === "unico") {
+    tipoTexto = "Único";
+  } else if (tipoControlActual === "ciclico") {
+    tipoTexto = "Cíclico";
+  } else if (tipoControlActual === "periodico") {
+    tipoTexto = "Periódico";
+  }
 
   formularios.forEach((titulo, index) => {
     titulo.textContent = `Control ${tipoTexto} #${index + 1}`;
@@ -160,11 +263,138 @@ function actualizarNumeracion() {
 // ===========================
 // LIMPIEZA Y RESET
 // ===========================
+function mostrarFormulario() {
+  const tipoControl = document.getElementById("tipoControl").value;
+  const btnAgregar = document.getElementById("btnAgregar");
+  const botonesFormulario = document.getElementById("botonesFormulario");
+  const contenedor = document.getElementById("contenedorFormularios");
+  const campoFechaFin = document.getElementById("campoFechaFin");
+  const campoProcesoPeriodico = document.getElementById(
+    "campoProcesoPeriodico"
+  );
+
+  // Limpiar contenedor y resetear contador
+  contenedor.innerHTML = "";
+  contadorFormularios = 0;
+  tipoControlActual = tipoControl;
+
+  if (tipoControl) {
+    // Mostrar elementos del formulario
+    botonesFormulario.classList.remove("d-none");
+    btnAgregar.classList.remove("d-none");
+
+    // Mostrar/ocultar campos según el tipo
+    if (tipoControl === "periodico") {
+      if (campoProcesoPeriodico) {
+        campoProcesoPeriodico.classList.remove("d-none");
+        habilitarValidacionCampos(campoProcesoPeriodico, true);
+      }
+      if (campoFechaFin) {
+        campoFechaFin.classList.add("d-none");
+        habilitarValidacionCampos(campoFechaFin, false);
+      }
+
+      // Crear 2 formularios por defecto para periódico
+      agregarFormulario();
+      agregarFormulario();
+
+      // IMPORTANTE: Después de crear los 2 formularios por defecto,
+      // ocultar botones eliminar porque son el mínimo requerido
+      actualizarBotonesEliminar();
+    } else {
+      if (campoFechaFin) {
+        campoFechaFin.classList.remove("d-none");
+        habilitarValidacionCampos(campoFechaFin, true);
+      }
+      if (campoProcesoPeriodico) {
+        campoProcesoPeriodico.classList.add("d-none");
+        habilitarValidacionCampos(campoProcesoPeriodico, false);
+      }
+
+      // Agregar primer formulario
+      agregarFormulario();
+    }
+  } else {
+    resetearFormularios();
+  }
+}
+
+function resetearFormularios() {
+  const contenedor = document.getElementById("contenedorFormularios");
+  const btnAgregar = document.getElementById("btnAgregar");
+  const botonesFormulario = document.getElementById("botonesFormulario");
+  const campoFechaFin = document.getElementById("campoFechaFin");
+  const campoProcesoPeriodico = document.getElementById(
+    "campoProcesoPeriodico"
+  );
+
+  if (contenedor) contenedor.innerHTML = "";
+  if (btnAgregar) btnAgregar.classList.add("d-none");
+  if (botonesFormulario) botonesFormulario.classList.add("d-none");
+
+  if (campoFechaFin) {
+    campoFechaFin.classList.add("d-none");
+    // DESHABILITAR validación al resetear
+    habilitarValidacionCampos(campoFechaFin, false);
+  }
+
+  if (campoProcesoPeriodico) {
+    campoProcesoPeriodico.classList.add("d-none");
+    // DESHABILITAR validación al resetear
+    habilitarValidacionCampos(campoProcesoPeriodico, false);
+  }
+
+  contadorFormularios = 0;
+  tipoControlActual = "";
+}
+
 function limpiarFormulario() {
   const form = document.getElementById("frmControlAutomatico");
   if (form) {
     form.reset();
   }
+
+  // LIMPIAR MANUALMENTE TODOS LOS CAMPOS ESPECÍFICOS
+
+  // Limpiar campo tipo de control
+  const tipoControl = document.getElementById("tipoControl");
+  if (tipoControl) {
+    tipoControl.value = "";
+  }
+
+  // Limpiar campos periódicos
+  const nombreProcesoPeriodico = document.querySelector(
+    'input[name="nombreProcesoPeriodico"]'
+  );
+  if (nombreProcesoPeriodico) {
+    nombreProcesoPeriodico.value = "";
+  }
+
+  const horasProceso = document.querySelector('input[name="horasProceso"]');
+  if (horasProceso) {
+    horasProceso.value = "";
+  }
+
+  // Limpiar campos de otros tipos
+  const nombrep = document.querySelector('input[name="nombrep"]');
+  if (nombrep) {
+    nombrep.value = "";
+  }
+
+  const fechaHoraFin = document.getElementById("fechaHoraFin");
+  if (fechaHoraFin) {
+    fechaHoraFin.value = "";
+  }
+
+  // Limpiar todos los campos de arrays (etapas dinámicas)
+  const camposArray = document.querySelectorAll(
+    'input[name*="[]"], select[name*="[]"], textarea[name*="[]"]'
+  );
+  camposArray.forEach((campo) => {
+    campo.value = "";
+  });
+
+  // Resetear formularios dinámicos
   resetearFormularios();
 }
 
@@ -173,22 +403,40 @@ function resetearFormularios() {
   const btnAgregar = document.getElementById("btnAgregar");
   const botonesFormulario = document.getElementById("botonesFormulario");
   const campoFechaFin = document.getElementById("campoFechaFin");
+  const campoProcesoPeriodico = document.getElementById(
+    "campoProcesoPeriodico"
+  );
 
   if (contenedor) contenedor.innerHTML = "";
   if (btnAgregar) btnAgregar.classList.add("d-none");
   if (botonesFormulario) botonesFormulario.classList.add("d-none");
-  if (campoFechaFin) campoFechaFin.classList.add("d-none");
+
+  if (campoFechaFin) {
+    campoFechaFin.classList.add("d-none");
+    // ELIMINAR ESTA LÍNEA - NO bloquear campos
+    // habilitarValidacionCampos(campoFechaFin, false);
+  }
+
+  if (campoProcesoPeriodico) {
+    campoProcesoPeriodico.classList.add("d-none");
+    // ELIMINAR ESTA LÍNEA - NO bloquear campos
+    // habilitarValidacionCampos(campoProcesoPeriodico, false);
+  }
 
   contadorFormularios = 0;
   tipoControlActual = "";
 }
 
 // ===========================
-// VALIDACIÓN DE FECHA FIN
+// VALIDACIÓN DE FECHA FIN Y CAMPOS PERIÓDICOS
 // ===========================
 function validarFechaFin() {
-  const fechaFin = document.getElementById("fechaHoraFin").value;
+  // Para periódico no validar fecha fin ya que se calcula automáticamente
+  if (tipoControlActual === "periodico") {
+    return validarCamposPeriodico();
+  }
 
+  const fechaFin = document.getElementById("fechaHoraFin").value;
   if (!fechaFin) {
     mostrarModalError("La fecha de finalización del proceso es obligatoria");
     return false;
@@ -223,6 +471,81 @@ function validarFechaFin() {
   return true;
 }
 
+function validarCamposPeriodico() {
+  // CORREGIR: Usar los name correctos del HTML
+  const nombreProceso = document.querySelector(
+    'input[name="nombreProcesoPeriodico"]'
+  );
+  if (!nombreProceso || !nombreProceso.value.trim()) {
+    mostrarModalError("El nombre del proceso periódico es obligatorio");
+    return false;
+  }
+
+  // Validar horas del proceso
+  const horasProceso = document.querySelector('input[name="horasProceso"]');
+  if (
+    !horasProceso ||
+    !horasProceso.value ||
+    parseFloat(horasProceso.value) <= 0
+  ) {
+    mostrarModalError("Las horas del proceso deben ser mayor a 0");
+    return false;
+  }
+
+  // Validar que todos los campos de las etapas estén completos
+  const formularios = document.querySelectorAll("#contenedorFormularios .card");
+  for (let i = 0; i < formularios.length; i++) {
+    const formulario = formularios[i];
+    const etapa = formulario.querySelector('input[name="etapa[]"]');
+    const fechaHora = formulario.querySelector(
+      'input[name="fechaHoraInicio[]"]'
+    );
+    const temperatura = formulario.querySelector('input[name="temperatura[]"]');
+    const humedad = formulario.querySelector('input[name="humedad[]"]');
+    const duracion = formulario.querySelector('input[name="duracion[]"]');
+
+    if (!etapa.value.trim()) {
+      mostrarModalError(`El nombre de la etapa ${i + 1} es obligatorio`);
+      return false;
+    }
+
+    if (!fechaHora.value) {
+      mostrarModalError(`La fecha y hora de la etapa ${i + 1} es obligatoria`);
+      return false;
+    }
+
+    if (!temperatura.value || isNaN(parseFloat(temperatura.value))) {
+      mostrarModalError(
+        `La temperatura de la etapa ${i + 1} debe ser un número válido`
+      );
+      return false;
+    }
+
+    if (
+      !humedad.value ||
+      isNaN(parseFloat(humedad.value)) ||
+      parseFloat(humedad.value) < 0 ||
+      parseFloat(humedad.value) > 100
+    ) {
+      mostrarModalError(
+        `La humedad de la etapa ${i + 1} debe estar entre 0 y 100`
+      );
+      return false;
+    }
+
+    if (
+      !duracion.value ||
+      isNaN(parseFloat(duracion.value)) ||
+      parseFloat(duracion.value) <= 0
+    ) {
+      mostrarModalError(`La duración de la etapa ${i + 1} debe ser mayor a 0`);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // ===========================
 // MANEJO DEL FORMULARIO
 // ===========================
@@ -231,7 +554,6 @@ function initializeFormSubmit() {
   if (form) {
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-
       // Validar fecha fin antes de procesar
       if (validarFechaFin()) {
         procesarFormulario();
@@ -262,25 +584,20 @@ function procesarFormulario() {
   const formData = new FormData(
     document.getElementById("frmControlAutomatico")
   );
-
   // Agregar información adicional
   formData.append("tipoControlActual", tipoControlActual);
   formData.append("totalFormularios", contadorFormularios);
 
   const http = new XMLHttpRequest();
   const url = base_url + "Automatico/crear";
-
   http.open("POST", url, true);
   http.send(formData);
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       console.log("Respuesta recibida:", this.responseText);
-
       try {
         const res = JSON.parse(this.responseText);
         console.log("JSON parseado:", res);
-
         if (res.success) {
           console.log(
             "Condición de éxito cumplida, llamando mostrarModalExito"
@@ -291,15 +608,12 @@ function procesarFormulario() {
           ListarHistorico();
         } else if (res.type === "control_activo") {
           console.log("Control activo detectado");
-
           // GUARDAR LAS VARIABLES GLOBALES CORRECTAMENTE
           window.nuevoControlData = res.nuevo_control;
           window.idControlActivo = res.id_control_activo;
-
           console.log("Variables guardadas:");
           console.log("idControlActivo:", window.idControlActivo);
           console.log("nuevoControlData:", window.nuevoControlData);
-
           mostrarModalAdvertencia(res.html_detalles);
         } else {
           console.log("Error detectado");
@@ -335,21 +649,16 @@ function mostrarModalAdvertencia(htmlDetalles) {
 function verControl(idControl) {
   const http = new XMLHttpRequest();
   const url = base_url + "Automatico/verControl";
-
   http.open("POST", url, true);
   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
   const params = "id_control=" + idControl;
   http.send(params);
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       const res = JSON.parse(this.responseText);
-
       if (res.success) {
         // Insertar el HTML en el modal
         document.getElementById("contenidoVerControl").innerHTML = res.html;
-
         // Mostrar el modal
         const modal = new bootstrap.Modal(
           document.getElementById("modalVerControl")
@@ -365,7 +674,6 @@ function verControl(idControl) {
 function eliminarControl(idControl) {
   // Guardar el ID en el campo oculto
   document.getElementById("idControlEliminar").value = idControl;
-
   // Mostrar el modal usando Bootstrap
   const modal = new bootstrap.Modal(
     document.getElementById("modalEliminarControl")
@@ -375,7 +683,6 @@ function eliminarControl(idControl) {
 
 function confirmarEliminacion() {
   const idControl = document.getElementById("idControlEliminar").value;
-
   if (!idControl) {
     alert("Error: ID de control no válido");
     return;
@@ -390,24 +697,19 @@ function confirmarEliminacion() {
   // Realizar la eliminación
   const http = new XMLHttpRequest();
   const url = base_url + "Automatico/eliminarControl";
-
   http.open("POST", url, true);
   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
   const params = "id_control=" + idControl;
   http.send(params);
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       const res = JSON.parse(this.responseText);
-
       if (res.success) {
         // Mostrar modal de éxito
         const modalExito = new bootstrap.Modal(
           document.getElementById("modalExitoEliminacion")
         );
         modalExito.show();
-
         // Cerrar automáticamente después de 2 segundos y recargar
         setTimeout(function () {
           modalExito.hide();
@@ -447,20 +749,16 @@ function eliminarControlActivoYContinuar() {
   // Eliminar el control activo
   const http = new XMLHttpRequest();
   const url = base_url + "Automatico/eliminarControl";
-
   http.open("POST", url, true);
   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
   const params = "id_control=" + window.idControlActivo;
   console.log("Enviando parámetros:", params);
   http.send(params);
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       console.log("Respuesta eliminación:", this.responseText);
       try {
         const res = JSON.parse(this.responseText);
-
         if (res.success) {
           console.log("✅ Control eliminado, creando nuevo");
           // Control eliminado exitosamente, ahora crear el nuevo
@@ -491,42 +789,64 @@ function crearNuevoControlDespuesDeEliminar() {
   // Recrear el FormData con los datos del nuevo control
   const formData = new FormData();
 
-  // Agregar el tipo de control
-  const tipoControl =
-    window.nuevoControlData.tipo_control_temperatura === 0
-      ? "unico"
-      : "ciclico";
+  // Determinar el tipo de control
+  let tipoControl = "unico";
+  if (window.nuevoControlData.tipo_control_temperatura === 1) {
+    tipoControl = "ciclico";
+  } else if (window.nuevoControlData.tipo_control_temperatura === 2) {
+    tipoControl = "periodico";
+  }
+
   formData.append("tipoControl", tipoControl);
 
-  // Agregar nombre del proceso
-  formData.append(
-    "nombrep",
-    window.nuevoControlData.proceso_control_temperatura
-  );
-
-  // Agregar fecha fin
-  formData.append(
-    "fechaHoraFin",
-    convertirFechaParaFormulario(
-      window.nuevoControlData.hora_fin_control_temperatura
-    )
-  );
+  // Agregar campos según el tipo de control
+  if (tipoControl === "periodico") {
+    // Para periódico: agregar nombre del proceso y horas
+    formData.append(
+      "nombreProcesoPeriodico",
+      window.nuevoControlData.proceso_control_temperatura
+    );
+    formData.append(
+      "horasProceso",
+      window.nuevoControlData.horas_proceso || 24
+    );
+  } else {
+    // Para único y cíclico: agregar nombre del proceso y fecha fin
+    formData.append(
+      "nombrep",
+      window.nuevoControlData.proceso_control_temperatura
+    );
+    formData.append(
+      "fechaHoraFin",
+      convertirFechaParaFormulario(
+        window.nuevoControlData.hora_fin_control_temperatura
+      )
+    );
+  }
 
   // Agregar las etapas
   window.nuevoControlData.lista_control_temperatura.forEach((etapa, index) => {
     formData.append("etapa[]", etapa.nombre_etapa);
     formData.append("temperatura[]", etapa.temperatura_etapa);
 
-    if (window.nuevoControlData.tipo_control_temperatura === 0) {
+    if (tipoControl === "unico") {
       // Para único, usar fechaHoraInicio
       formData.append(
         "fechaHoraInicio[]",
         convertirFechaParaFormulario(etapa.hora_inicio_etapa)
       );
-    } else {
+    } else if (tipoControl === "ciclico") {
       // Para cíclico, usar solo hora
       const horaExtraida = extraerHoraDeFecha(etapa.hora_inicio_etapa);
       formData.append("hora[]", horaExtraida);
+    } else if (tipoControl === "periodico") {
+      // Para periódico, usar fechaHoraInicio, humedad y duración
+      formData.append(
+        "fechaHoraInicio[]",
+        convertirFechaParaFormulario(etapa.hora_inicio_etapa)
+      );
+      formData.append("humedad[]", etapa.humedad_etapa || 50);
+      formData.append("duracion[]", etapa.duracion_etapa || 2.0);
     }
   });
 
@@ -535,23 +855,19 @@ function crearNuevoControlDespuesDeEliminar() {
   // Enviar la petición para crear el nuevo control
   const http = new XMLHttpRequest();
   const url = base_url + "Automatico/crear";
-
   http.open("POST", url, true);
   http.send(formData);
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       console.log("Respuesta creación nuevo control:", this.responseText);
       try {
         const res = JSON.parse(this.responseText);
-
         if (res.success) {
           mostrarModalExito(
             "Control anterior eliminado y nuevo control creado exitosamente"
           );
           limpiarFormulario();
           ListarControl();
-
           // Limpiar variables globales
           window.idControlActivo = null;
           window.nuevoControlData = null;
@@ -574,15 +890,12 @@ function convertirFechaParaFormulario(fechaCustom) {
   if (!fechaCustom || fechaCustom === "No definida") {
     return "";
   }
-
   const regex = /(\d{2})-(\d{2})-(\d{4})_(\d{2})-(\d{2})/;
   const match = fechaCustom.match(regex);
-
   if (match) {
     const [, dia, mes, año, hora, minuto] = match;
     return `${año}-${mes}-${dia}T${hora}:${minuto}`;
   }
-
   return fechaCustom;
 }
 
@@ -591,15 +904,12 @@ function extraerHoraDeFecha(fechaCustom) {
   if (!fechaCustom) {
     return "";
   }
-
   const regex = /(\d{2})-(\d{2})-(\d{4})_(\d{2})-(\d{2})/;
   const match = fechaCustom.match(regex);
-
   if (match) {
     const [, , , , hora, minuto] = match;
     return `${hora}:${minuto}`;
   }
-
   return "";
 }
 
@@ -627,7 +937,6 @@ function cargarContadores() {
   const url = base_url + "Automatico/obtenerContadores";
   http.open("POST", url, true);
   http.send();
-
   http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       try {
@@ -659,7 +968,6 @@ function actualizarContadoresEnVista(data) {
     data.hoy.reestablecido;
 
   // AGREGAR ESTAS LÍNEAS PARA MOSTRAR LAS FECHAS:
-
   // Formatear fechas desde created_at y updated_at
   const fechaInicio = data.created_at
     ? new Date(data.created_at).toLocaleDateString("es-PE")
@@ -678,5 +986,29 @@ function actualizarContadoresEnVista(data) {
   const fechaHoyFormateada = `(${data.fecha_actual_formateada})`;
   document.querySelectorAll(".fecha-hoy").forEach((el) => {
     el.textContent = fechaHoyFormateada;
+  });
+}
+
+function actualizarBotonesEliminar() {
+  const contenedor = document.getElementById("contenedorFormularios");
+  const totalFormularios = contenedor.children.length;
+  const botonesEliminar = contenedor.querySelectorAll(".btn-eliminar");
+
+  botonesEliminar.forEach((boton) => {
+    if (tipoControlActual === "periodico") {
+      // Para periódico: ocultar botón si solo hay 2 formularios
+      if (totalFormularios <= 2) {
+        boton.style.display = "none";
+      } else {
+        boton.style.display = "inline-block";
+      }
+    } else {
+      // Para único/cíclico: ocultar botón si solo hay 1 formulario
+      if (totalFormularios <= 1) {
+        boton.style.display = "none";
+      } else {
+        boton.style.display = "inline-block";
+      }
+    }
   });
 }
