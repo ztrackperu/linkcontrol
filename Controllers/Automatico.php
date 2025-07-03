@@ -17,7 +17,7 @@ class Automatico extends Controller
     {
         $body = array(
             "especifico" => 0,
-            "id_usuario" => 0
+            "id_usuario" => $_SESSION['id_ztrack'] 
             
         );
         
@@ -158,7 +158,7 @@ public function crear()
         $jsonData = array(
             "proceso_control_temperatura" => "",
             "tipo_control_temperatura" => $tipoNumerico,
-            "user_c" => $_SESSION['id_ztrack'], // ID del usuario logueado
+            "user_c" => $_SESSION['id_ztrack'],
             "lista_control_temperatura" => array()
         );
         
@@ -489,8 +489,8 @@ public function verControl($id_control = null)
     
     $body = array(
         "especifico" => $id_control,
-        "id_usuario" => 0,
-        "tipo_usuario" => 0
+        "id_usuario" =>  $_SESSION['id_ztrack'],
+        "tipo_usuario" => $_SESSION['permiso_ztrack']
     );
     
     $response = $this->model->verControl($body);
@@ -707,8 +707,8 @@ public function eliminarControl()
     
     $body = array(
         "especifico" => $id_control,
-        "id_usuario" => 0,
-        "tipo_usuario" => 0
+        "id_usuario" =>  $_SESSION['id_ztrack'],
+        "tipo_usuario" => $_SESSION['permiso_ztrack']
     );
     
     $response = $this->model->eliminarControl($body);
