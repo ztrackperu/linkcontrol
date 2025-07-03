@@ -388,7 +388,7 @@ function ContenedorMadurador_2($val, $url=0){
     $pwd_pr = porcentaje($val->defrost_prueba);
     $process_v = validateP($val->stateProcess);
     $horasInteccion =horas_simuladas($val->ripener_prueba);
-    $imagenPrincipal = base_url . "Assets/img/furgon.png";
+    $imagenPrincipal = base_url . "Assets/img/base2.jpg";
     //val_eti
     $text = "
             <div class='row text-center'>
