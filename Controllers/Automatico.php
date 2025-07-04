@@ -37,11 +37,42 @@ class Automatico extends Controller
             foreach ($data['data']['resultado'] as $control) {
                 $tipoTexto = $control['tipo_control_temperatura'] == 0 ? 'Único' : 'Cíclico';
                 $tipoBadge = $control['tipo_control_temperatura'] == 0 ? 'bg-primary' : 'bg-info';
-                $estadoTexto = $control['estado_control_temperatura'] == 1 ? 'Activo' : 'Inactivo';
-                $estadoBadge = $control['estado_control_temperatura'] == 1 ? 'bg-success' : 'bg-danger';
+                if ($control['estado_control_temperatura'] == 1) {
+                    $estadoTexto = '
+                        <div class="d-flex justify-content-center align-items-center gap-2 text-success fw-semibold fs-6">
+                            <div class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true"></div>
+                            <span>Activo</span>
+                        </div>';
+                    $estadoBadge = 'd-flex justify-content-center align-items-center text-success fw-semibold fs-6';
+                } else {
+                    $estadoTexto = '
+                        <div class="d-flex justify-content-center align-items-center gap-2 text-danger fw-semibold fs-6">
+                            <i class="bi bi-x-circle-fill"></i>
+                            <span>Inactivo</span>
+                        </div>';
+                    $estadoBadge = 'd-flex justify-content-center align-items-center bg-danger text-white fw-semibold fs-6';
+                }
                 
-                $condicionTexto = $control['condicion_control_temperatura'] == 1 ? 'En proceso' : 'Completado';
-                $condicionBadge = $control['condicion_control_temperatura'] == 1 ? 'bg-warning' : 'bg-success';
+                if ($control['condicion_control_temperatura'] == 1) {
+                    $condicionTexto = '
+                      <div class="position-relative d-inline-flex align-items-center justify-content-center" style="width: 5rem; height: 5rem;">
+                        <div class="spinner-border text-success" role="status" style="width: 5rem; height: 5rem;"></div>
+                        <span class="position-absolute text-center fw-semibold text-success fs-6" style="width: 4rem; font-size: 0.75rem; user-select:none;">
+                          En<br>proceso
+                        </span>
+                      </div>';
+                    $condicionBadge = 'd-flex justify-content-center align-items-center';
+                } else {
+                    $condicionTexto = '
+                      <div class="d-flex align-items-center gap-2 text-success fs-6">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Completado</span>
+                      </div>';
+                    $condicionBadge = 'd-inline-flex align-items-center text-success fs-6';
+                }
+                
+                
+                
                 // Obtener el ID real del control
                 $idControl = $control['id_control_temperatura'];
                 
