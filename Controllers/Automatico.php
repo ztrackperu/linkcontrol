@@ -440,35 +440,34 @@ public function crear()
 
     
     
-    /**
-     * Convierte fecha del formato HTML5 al formato requerido
-     */
     private function convertirFechaFormato($fechaHtml)
     {
         try {
+            $zonaLima = new DateTimeZone('America/Lima');
+    
             // Intentar parsear formato HTML5 datetime-local
-            $fecha = DateTime::createFromFormat('Y-m-d\TH:i', $fechaHtml);
+            $fecha = DateTime::createFromFormat('Y-m-d\TH:i', $fechaHtml, $zonaLima);
             if ($fecha) {
                 return $fecha->format('d-m-Y_H-i');
             }
-            
+    
             // Intentar otros formatos comunes
-            $fecha = DateTime::createFromFormat('Y-m-d H:i:s', $fechaHtml);
+            $fecha = DateTime::createFromFormat('Y-m-d H:i:s', $fechaHtml, $zonaLima);
             if ($fecha) {
                 return $fecha->format('d-m-Y_H-i');
             }
-            
-            $fecha = DateTime::createFromFormat('Y-m-d H:i', $fechaHtml);
+    
+            $fecha = DateTime::createFromFormat('Y-m-d H:i', $fechaHtml, $zonaLima);
             if ($fecha) {
                 return $fecha->format('d-m-Y_H-i');
             }
-            
+    
         } catch (Exception $e) {
             // Si hay error, continuar con fallback
         }
-        
-        // Fallback: retornar fecha actual
-        return date('d-m-Y_H-i');
+    
+        // Fallback: retornar fecha actual en zona Lima
+        return (new DateTime('now', new DateTimeZone('America/Lima')))->format('d-m-Y_H-i');
     }
     
 
